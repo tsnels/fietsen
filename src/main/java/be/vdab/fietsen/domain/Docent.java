@@ -8,6 +8,7 @@ import java.math.RoundingMode;
 
 @Entity
 @Table(name = "docenten")
+
 public class Docent {
 
 

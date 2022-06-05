@@ -2,6 +2,7 @@ package be.vdab.fietsen.repositories;
 
 import be.vdab.fietsen.domain.Docent;
 import be.vdab.fietsen.domain.Geslacht;
+import be.vdab.fietsen.projections.AantalDocentenPerWedde;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -13,9 +14,7 @@ import org.springframework.test.context.junit4.AbstractTransactionalJUnit4Spring
 import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNullPointerException;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest(showSql = false)
 @Sql("/insertDocent.sql")
@@ -35,7 +34,7 @@ class DocentRepositoryTest extends AbstractTransactionalJUnit4SpringContextTests
 
     @BeforeEach
     void beforeEach() {
-        docent = new Docent("test", "test", BigDecimal.TEN, "test@test.be", Geslacht.MAN);
+        docent = new Docent("testtt", "testtt", BigDecimal.TEN, "test@test.be", Geslacht.MAN);
     }
 
     private long idVanTestMan() {
@@ -124,5 +123,24 @@ class DocentRepositoryTest extends AbstractTransactionalJUnit4SpringContextTests
     void findGrootsteWedde () {
         assertThat(repository.findGrootsteWedde()).isEqualByComparingTo(
                 jdbcTemplate.queryForObject("select max(wedde) from docenten", BigDecimal.class));
+    }
+
+    @Test
+    void findAantalDocentenPerWedde () {
+        var duiwend = BigDecimal.valueOf(1_000);
+        assertThat(repository.findAantalDocentenPerWedde()).hasSize(jdbcTemplate.queryForObject(
+                "select count(distinct wedde) from docenten", Integer.class)).filteredOn(
+                        aantalPerWedde -> aantalPerWedde.wedde().compareTo(duiwend) == 0)
+                .singleElement()
+                .extracting(AantalDocentenPerWedde::aantal)
+                .isEqualTo((long) super.countRowsInTableWhere(DOCENTEN, "wedde = 1000"));
+    }
+
+    @Test
+    void algemeneOpslag(){
+        assertThat(repository.algemeneOpslag(BigDecimal.TEN))
+                .isEqualTo(countRowsInTable(DOCENTEN));
+        assertThat(countRowsInTableWhere(DOCENTEN,
+                "wedde = 1100 and id = " + idVanTestMan())).isOne();
     }
 }

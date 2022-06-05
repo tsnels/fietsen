@@ -1,14 +1,17 @@
 package be.vdab.fietsen.repositories;
 
 import be.vdab.fietsen.domain.Docent;
+import be.vdab.fietsen.projections.AantalDocentenPerWedde;
 import be.vdab.fietsen.projections.IdEnEmailAdres;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+@Transactional
 @Repository
 public class DocentRepository {
     private final EntityManager manager;
@@ -20,6 +23,7 @@ public class DocentRepository {
     public Optional<Docent> findById(long id) {
         return Optional.ofNullable(manager.find(Docent.class, id));
     }
+
 
     public void create(Docent docent){
         manager.persist(docent);
@@ -40,12 +44,16 @@ public class DocentRepository {
     }
 
     public List<Docent> findWeddeBetween(BigDecimal van, BigDecimal tot) {
-        return manager.createQuery(
-                """
-                    select d
-                    from Docent d
-                    where d.wedde between :van and :tot
-                """, Docent.class).setParameter("van", van).
+//        return manager.createQuery(
+//                """
+//                    select d
+//                    from Docent d
+//                    where d.wedde between :van and :tot
+//                """, Docent.class).setParameter("van", van).
+//                setParameter("tot", tot).getResultList();
+            // wordt vervangen door:
+                return manager.createNamedQuery(
+                "Docent.findByWeddeBetween", Docent.class).setParameter("van", van).
                 setParameter("tot", tot).getResultList();
     }
 
@@ -72,5 +80,21 @@ public class DocentRepository {
                     from Docent d
                 """, BigDecimal.class).getSingleResult();
     }
+
+    public List<AantalDocentenPerWedde> findAantalDocentenPerWedde() {
+        return manager.createQuery(
+                """
+                    select new be.vdab.fietsen.projections.AantalDocentenPerWedde(d.wedde, count(d))
+                    from Docent d
+                    group by d.wedde
+                """, AantalDocentenPerWedde.class).getResultList();
+    }
+
+    public int algemeneOpslag(BigDecimal percentage) {
+        return manager.createNamedQuery("Docent.algemeneOpslag")
+                .setParameter("percentage", percentage)
+                .executeUpdate();
+    }
+
 
 }
