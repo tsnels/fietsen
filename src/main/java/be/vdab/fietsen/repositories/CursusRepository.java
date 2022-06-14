@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.swing.text.html.Option;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class CursusRepository {
@@ -17,7 +18,7 @@ public class CursusRepository {
         this.manager = manager;
     }
 
-    public Optional<Cursus> findById(long id) {
+    public Optional<Cursus> findById(UUID id) {
         return Optional.ofNullable(manager.find(Cursus.class, id));
     }
 

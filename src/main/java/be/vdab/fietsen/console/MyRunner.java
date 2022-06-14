@@ -27,12 +27,12 @@ public class MyRunner implements CommandLineRunner {
 //        var lijst = repository.findEmailAdressen();
 //        lijst.forEach(adres -> System.out.println(adres + "/n"));
 
-        var nieuweDocent = new Docent("test", "testt", BigDecimal.valueOf(3500), "test@test.be", Geslacht.MAN);
-        try {
-//            repository.delete(472);
-        } catch (Exception ex) {
-            System.err.println(ex);
-        }
-        System.err.println("okej");
+//        var nieuweDocent = new Docent("test", "testt", BigDecimal.valueOf(3500), "test@test.be", Geslacht.MAN);
+//        try {
+////            repository.delete(472);
+//        } catch (Exception ex) {
+//            System.err.println(ex);
+//        }
+//        System.err.println("okej");
     }
 }
